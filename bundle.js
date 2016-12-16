@@ -48,22 +48,19 @@
 
 
 
-	const MovingObject = __webpack_require__(1);
+	const Asteroid = __webpack_require__(2);
 
 	const canvasEl = document.getElementsByTagName("canvas")[0];
 	canvasEl.height = window.innerHeight;
 	canvasEl.width = window.innerWidth;
 	const ctx = canvasEl.getContext("2d");
-	let circle = new MovingObject({ pos: [30, 30], vel: [10, 10], radius: 5, color: "#00FF00"});
-	circle.draw(ctx);
+
+	let asteroid = new Asteroid({pos: [30, 30]});
+	asteroid.draw(ctx);
 	document.onclick = () => {
-	  circle.move();
-	  circle.draw(ctx);
+	  asteroid.move();
+	  asteroid.draw(ctx);
 	};
-	// new MovingObject(
-	//   canvasEl.width,
-	//   canvasEl.height
-	// ).start(canvasEl);
 
 
 /***/ },
@@ -96,17 +93,57 @@
 	  this.pos[1] += this.vel[1];
 	};
 
-
-
-
-
-
-
-
-
-
-
 	module.exports = MovingObject;
+
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Util = __webpack_require__(3);
+	const MovingObject = __webpack_require__(1);
+
+	function Asteroid(options) {
+	  MovingObject.call(this, {
+	    pos: options["pos"],
+	    vel: Util.randomVec(10),
+	    radius: Asteroid.RADIUS,
+	    color: Asteroid.COLOR
+	  });
+	}
+
+	Asteroid.COLOR = "#0000FF";
+	Asteroid.RADIUS = 20;
+
+	Util.inherits(Asteroid, MovingObject);
+
+	module.exports = Asteroid;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	const Util = {
+	  inherits (childClass, parentClass) {
+	    function Surrogate () {}
+	    Surrogate.prototype = parentClass.prototype;
+	    childClass.prototype = new Surrogate();
+	    childClass.prototype.constructor = childClass;
+	  },
+
+	  // Return a randomly oriented vector with the given length.
+	  randomVec (length) {
+	    const deg = 2 * Math.PI * Math.random();
+	    return Util.scale([Math.sin(deg), Math.cos(deg)], length);
+	  },
+	  // Scale the length of a vector by the given amount.
+	  scale (vec, m) {
+	    return [vec[0] * m, vec[1] * m];
+	  }
+	};
+
+	module.exports = Util;
 
 
 /***/ }
