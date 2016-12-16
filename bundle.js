@@ -73,6 +73,7 @@
 	  this.vel = options["vel"];
 	  this.radius = options["radius"];
 	  this.color = options["color"];
+	  this.game = options["game"];
 	}
 
 	MovingObject.prototype.draw = function(ctx) {
@@ -92,6 +93,7 @@
 	MovingObject.prototype.move = function() {
 	  this.pos[0] += this.vel[0];
 	  this.pos[1] += this.vel[1];
+	  this.pos = this.game.wrap(this.pos);
 	};
 
 	module.exports = MovingObject;
@@ -107,9 +109,10 @@
 	function Asteroid(options) {
 	  MovingObject.call(this, {
 	    pos: options["pos"],
-	    vel: Util.randomVec(10),
+	    vel: Util.randomVec(1),
 	    radius: Asteroid.RADIUS,
-	    color: Asteroid.COLOR
+	    color: Asteroid.COLOR,
+	    game: options["game"]
 	  });
 	}
 
@@ -164,7 +167,7 @@
 
 	Game.prototype.addAsteroids = function() {
 	  for (let i = 0; i < Game.NUM_ASTEROIDS; i++) {
-	    let asteroid = new Asteroid({pos: this.randomPosition()});
+	    let asteroid = new Asteroid({pos: this.randomPosition(), game: this});
 	    this.asteroids.push(asteroid);
 	  }
 	};
@@ -186,6 +189,12 @@
 	  for (let i = 0; i < Game.NUM_ASTEROIDS; i++) {
 	    this.asteroids[i].move();
 	  }
+	};
+
+	Game.prototype.wrap = function (pos) {
+	  const newX = ((pos[0] % Game.DIM_X) + Game.DIM_X) % Game.DIM_X;
+	  const newY = ((pos[1] % Game.DIM_Y) + Game.DIM_Y) % Game.DIM_Y;
+	  return [newX, newY];
 	};
 
 	module.exports = Game;
