@@ -2,16 +2,16 @@
 
 
 
-const Asteroid = require('./lib/asteroid.js');
+const Game = require('./lib/game.js');
 
 const canvasEl = document.getElementsByTagName("canvas")[0];
 canvasEl.height = window.innerHeight;
 canvasEl.width = window.innerWidth;
 const ctx = canvasEl.getContext("2d");
 
-let asteroid = new Asteroid({pos: [30, 30]});
-asteroid.draw(ctx);
+let game = new Game();
+game.draw(ctx);
 document.onclick = () => {
-  asteroid.move();
-  asteroid.draw(ctx);
+  game.moveObjects();
+  game.draw(ctx);
 };

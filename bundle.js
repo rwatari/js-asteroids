@@ -48,18 +48,18 @@
 
 
 
-	const Asteroid = __webpack_require__(2);
+	const Game = __webpack_require__(4);
 
 	const canvasEl = document.getElementsByTagName("canvas")[0];
 	canvasEl.height = window.innerHeight;
 	canvasEl.width = window.innerWidth;
 	const ctx = canvasEl.getContext("2d");
 
-	let asteroid = new Asteroid({pos: [30, 30]});
-	asteroid.draw(ctx);
+	let game = new Game();
+	game.draw(ctx);
 	document.onclick = () => {
-	  asteroid.move();
-	  asteroid.draw(ctx);
+	  game.moveObjects();
+	  game.draw(ctx);
 	};
 
 
@@ -144,6 +144,50 @@
 	};
 
 	module.exports = Util;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Asteroid = __webpack_require__(2);
+
+	function Game() {
+	  this.asteroids = [];
+	  this.addAsteroids();
+	}
+
+	Game.DIM_X = 800;
+	Game.DIM_Y = 600;
+	Game.NUM_ASTEROIDS = 25;
+
+	Game.prototype.addAsteroids = function() {
+	  for (let i = 0; i < Game.NUM_ASTEROIDS; i++) {
+	    let asteroid = new Asteroid({pos: this.randomPosition()});
+	    this.asteroids.push(asteroid);
+	  }
+	};
+
+	Game.prototype.randomPosition = function() {
+	  const posX = Math.floor(Math.random()*Game.DIM_X);
+	  const posY = Math.floor(Math.random()*Game.DIM_Y);
+	  return [posX, posY];
+	};
+
+	Game.prototype.draw = function(ctx) {
+	  ctx.clearRect(0, 0, Game.DIM_X, Game.DIM_Y);
+	  for (let i = 0; i < this.asteroids.length; i++) {
+	    this.asteroids[i].draw(ctx);
+	  }
+	};
+
+	Game.prototype.moveObjects = function() {
+	  for (let i = 0; i < Game.NUM_ASTEROIDS; i++) {
+	    this.asteroids[i].move();
+	  }
+	};
+
+	module.exports = Game;
 
 
 /***/ }
