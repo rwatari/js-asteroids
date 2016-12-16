@@ -66,7 +66,9 @@
 
 /***/ },
 /* 1 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
+
+	const Util = __webpack_require__(3);
 
 	function MovingObject(options) {
 	  this.pos = options["pos"];
@@ -95,6 +97,18 @@
 	  this.pos[1] += this.vel[1];
 	  this.pos = this.game.wrap(this.pos);
 	};
+
+	MovingObject.prototype.isCollidedWith = function (otherObject) {
+	  const dist = Util.distance(this.pos, otherObject.pos);
+	  const collisionLimit = this.radius + otherObject.radius;
+	  return dist < collisionLimit;
+	};
+
+	MovingObject.prototype.collideWith = function(otherObject) {
+	  this.game.remove(otherObject);
+	  this.game.remove(this);
+	};
+
 
 	module.exports = MovingObject;
 
@@ -144,6 +158,12 @@
 	  // Scale the length of a vector by the given amount.
 	  scale (vec, m) {
 	    return [vec[0] * m, vec[1] * m];
+	  },
+
+	  distance (pos1, pos2) {
+	    const diffX = pos1[0] - pos2[0];
+	    const diffY = pos1[1] - pos2[1];
+	    return Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
 	  }
 	};
 
@@ -163,7 +183,7 @@
 
 	Game.DIM_X = 800;
 	Game.DIM_Y = 600;
-	Game.NUM_ASTEROIDS = 25;
+	Game.NUM_ASTEROIDS = 10;
 
 	Game.prototype.addAsteroids = function() {
 	  for (let i = 0; i < Game.NUM_ASTEROIDS; i++) {
@@ -186,7 +206,7 @@
 	};
 
 	Game.prototype.moveObjects = function() {
-	  for (let i = 0; i < Game.NUM_ASTEROIDS; i++) {
+	  for (let i = 0; i < this.asteroids.length; i++) {
 	    this.asteroids[i].move();
 	  }
 	};
@@ -196,6 +216,31 @@
 	  const newY = ((pos[1] % Game.DIM_Y) + Game.DIM_Y) % Game.DIM_Y;
 	  return [newX, newY];
 	};
+
+	Game.prototype.checkCollisions = function() {
+	  for (let i = 0; i < this.asteroids.length - 1; i++) {
+	    for (let j = i + 1; j < this.asteroids.length; j++) {
+	      const ast1 = this.asteroids[i];
+	      const ast2 = this.asteroids[j];
+	      if (ast1.isCollidedWith(ast2)) {
+	        alert("COLLISION");
+	        ast1.collideWith(ast2);
+	      }
+	    }
+	  }
+	};
+
+	Game.prototype.step = function() {
+	  this.moveObjects();
+	  this.checkCollisions();
+	};
+
+	Game.prototype.remove = function(asteroid) {
+	  const asteroidIndex = this.asteroids.indexOf(asteroid);
+	  this.asteroids.splice(asteroidIndex, 1);
+	};
+
+
 
 	module.exports = Game;
 
@@ -214,7 +259,7 @@
 	GameView.prototype.start = function() {
 	  const that = this;
 	  setInterval(function() {
-	    that.game.moveObjects();
+	    that.game.step();
 	    that.game.draw(that.ctx);
 	  }, 20);
 	};
