@@ -2,16 +2,17 @@
 
 
 
-const Game = require('./lib/game.js');
+const GameView = require('./lib/game_view.js');
 
-const canvasEl = document.getElementsByTagName("canvas")[0];
-canvasEl.height = window.innerHeight;
-canvasEl.width = window.innerWidth;
-const ctx = canvasEl.getContext("2d");
-
-let game = new Game();
-game.draw(ctx);
-document.onclick = () => {
-  game.moveObjects();
-  game.draw(ctx);
-};
+document.addEventListener("DOMContentLoaded", function(event) {
+  const canvasEl = document.getElementById("game-canvas");
+  // canvasEl.height = window.innerHeight;
+  // canvasEl.width = window.innerWidth;
+  const ctx = canvasEl.getContext("2d");
+  const gameView = new GameView(ctx);
+  gameView.start();
+  // document.onclick = () => {
+  //   game.moveObjects();
+  //   game.draw(ctx);
+  // };
+});

@@ -48,19 +48,20 @@
 
 
 
-	const Game = __webpack_require__(4);
+	const GameView = __webpack_require__(5);
 
-	const canvasEl = document.getElementsByTagName("canvas")[0];
-	canvasEl.height = window.innerHeight;
-	canvasEl.width = window.innerWidth;
-	const ctx = canvasEl.getContext("2d");
-
-	let game = new Game();
-	game.draw(ctx);
-	document.onclick = () => {
-	  game.moveObjects();
-	  game.draw(ctx);
-	};
+	document.addEventListener("DOMContentLoaded", function(event) {
+	  const canvasEl = document.getElementById("game-canvas");
+	  // canvasEl.height = window.innerHeight;
+	  // canvasEl.width = window.innerWidth;
+	  const ctx = canvasEl.getContext("2d");
+	  const gameView = new GameView(ctx);
+	  gameView.start();
+	  // document.onclick = () => {
+	  //   game.moveObjects();
+	  //   game.draw(ctx);
+	  // };
+	});
 
 
 /***/ },
@@ -188,6 +189,29 @@
 	};
 
 	module.exports = Game;
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Game = __webpack_require__(4);
+
+	function GameView(ctx) {
+	  this.game = new Game();
+	  this.ctx = ctx;
+	}
+
+	GameView.prototype.start = function() {
+	  const that = this;
+	  setInterval(function() {
+	    that.game.moveObjects();
+	    that.game.draw(that.ctx);
+	  }, 20);
+	};
+
+
+	module.exports = GameView;
 
 
 /***/ }
