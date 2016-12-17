@@ -105,8 +105,7 @@
 	};
 
 	MovingObject.prototype.collideWith = function(otherObject) {
-	  this.game.remove(otherObject);
-	  this.game.remove(this);
+	  
 	};
 
 
@@ -119,21 +118,28 @@
 
 	const Util = __webpack_require__(3);
 	const MovingObject = __webpack_require__(1);
+	const Ship = __webpack_require__(6);
 
 	function Asteroid(options) {
 	  MovingObject.call(this, {
 	    pos: options["pos"],
-	    vel: Util.randomVec(1),
+	    vel: Util.randomVec(10),
 	    radius: Asteroid.RADIUS,
 	    color: Asteroid.COLOR,
 	    game: options["game"]
 	  });
 	}
 
+	Util.inherits(Asteroid, MovingObject);
+
+	Asteroid.prototype.collideWith = function(otherObject) {
+	  if (otherObject instanceof Ship) {
+	    otherObject.relocate();
+	  }
+	};
+
 	Asteroid.COLOR = "#0000FF";
 	Asteroid.RADIUS = 20;
-
-	Util.inherits(Asteroid, MovingObject);
 
 	module.exports = Asteroid;
 
@@ -175,10 +181,12 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	const Asteroid = __webpack_require__(2);
+	const Ship = __webpack_require__(6);
 
 	function Game() {
 	  this.asteroids = [];
 	  this.addAsteroids();
+	  this.ship = new Ship({pos: this.randomPosition(), game: this});
 	}
 
 	Game.DIM_X = 800;
@@ -200,14 +208,14 @@
 
 	Game.prototype.draw = function(ctx) {
 	  ctx.clearRect(0, 0, Game.DIM_X, Game.DIM_Y);
-	  for (let i = 0; i < this.asteroids.length; i++) {
-	    this.asteroids[i].draw(ctx);
+	  for (let i = 0; i < this.allObjects().length; i++) {
+	    this.allObjects()[i].draw(ctx);
 	  }
 	};
 
 	Game.prototype.moveObjects = function() {
-	  for (let i = 0; i < this.asteroids.length; i++) {
-	    this.asteroids[i].move();
+	  for (let i = 0; i < this.allObjects().length; i++) {
+	    this.allObjects()[i].move();
 	  }
 	};
 
@@ -218,13 +226,15 @@
 	};
 
 	Game.prototype.checkCollisions = function() {
-	  for (let i = 0; i < this.asteroids.length - 1; i++) {
-	    for (let j = i + 1; j < this.asteroids.length; j++) {
-	      const ast1 = this.asteroids[i];
-	      const ast2 = this.asteroids[j];
-	      if (ast1.isCollidedWith(ast2)) {
+	  for (let i = 0; i < this.allObjects().length - 1; i++) {
+	    for (let j = i + 1; j < this.allObjects().length; j++) {
+	      const obj1 = this.allObjects()[i];
+	      const obj2 = this.allObjects()[j];
+	      // ship will always be last in allObjects
+	      // we will never call ship.collideWith
+	      if (obj1.isCollidedWith(obj2)) {
 	        alert("COLLISION");
-	        ast1.collideWith(ast2);
+	        obj1.collideWith(obj2);
 	      }
 	    }
 	  }
@@ -240,7 +250,9 @@
 	  this.asteroids.splice(asteroidIndex, 1);
 	};
 
-
+	Game.prototype.allObjects = function() {
+	  return this.asteroids.concat([this.ship]);
+	};
 
 	module.exports = Game;
 
@@ -266,6 +278,36 @@
 
 
 	module.exports = GameView;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const MovingObject = __webpack_require__(1);
+	const Util = __webpack_require__(3);
+
+	function Ship(options) {
+	  MovingObject.call(this, {
+	    pos: options["pos"],
+	    vel: [0, 0],
+	    radius: Ship.RADIUS,
+	    color: Ship.COLOR,
+	    game: options["game"]
+	  });
+	}
+
+	Util.inherits(Ship, MovingObject);
+
+	Ship.prototype.relocate = function() {
+	  this.pos = this.game.randomPosition();
+	  this.vel = [0, 0];
+	};
+
+	Ship.RADIUS = 10;
+	Ship.COLOR = "#FF0000";
+
+	module.exports = Ship;
 
 
 /***/ }
