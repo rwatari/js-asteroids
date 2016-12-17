@@ -123,7 +123,7 @@
 	function Asteroid(options) {
 	  MovingObject.call(this, {
 	    pos: options["pos"],
-	    vel: Util.randomVec(10),
+	    vel: Util.randomVec(5),
 	    radius: Asteroid.RADIUS,
 	    color: Asteroid.COLOR,
 	    game: options["game"]
@@ -233,7 +233,7 @@
 	      // ship will always be last in allObjects
 	      // we will never call ship.collideWith
 	      if (obj1.isCollidedWith(obj2)) {
-	        alert("COLLISION");
+	        // alert("COLLISION");
 	        obj1.collideWith(obj2);
 	      }
 	    }
@@ -274,8 +274,16 @@
 	    that.game.step();
 	    that.game.draw(that.ctx);
 	  }, 20);
+	  this.bindKeyHandlers();
 	};
 
+	GameView.prototype.bindKeyHandlers = function () {
+	  const game = this.game;
+	  key('up', function() {game.ship.power([0,-1]);});
+	  key('left', function() {game.ship.power([-1,0]);});
+	  key('right', function() {game.ship.power([1,0]);});
+	  key('down', function() {game.ship.power([0,1]);});
+	};
 
 	module.exports = GameView;
 
@@ -302,6 +310,11 @@
 	Ship.prototype.relocate = function() {
 	  this.pos = this.game.randomPosition();
 	  this.vel = [0, 0];
+	};
+
+	Ship.prototype.power = function(impulse) {
+	  this.vel[0] += impulse[0];
+	  this.vel[1] += impulse[1];
 	};
 
 	Ship.RADIUS = 10;
