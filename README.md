@@ -10,3 +10,8 @@ TODO:
 * Add lives & gameover
 * Add asteroids after removal
 * Graphics
+
+Play at [https://rwatari.github.io/js-asteroids/]
+
+[https://rwatari.github.io/js-asteroids/]: https://rwatari.github.io/js-asteroids/
+
