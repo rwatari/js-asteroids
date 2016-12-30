@@ -73,15 +73,12 @@
 	function GameView(ctx) {
 	  this.game = new Game();
 	  this.ctx = ctx;
+	  this.lastTime = 0;
 	}
 
 	GameView.prototype.start = function() {
-	  const that = this;
-	  setInterval(function() {
-	    that.game.step();
-	    that.game.draw(that.ctx);
-	  }, 20);
 	  this.bindKeyHandlers();
+	  requestAnimationFrame(this.animate.bind(this));
 	};
 
 	GameView.prototype.bindKeyHandlers = function () {
@@ -91,6 +88,16 @@
 	  key('right', function() {game.ship.power([1,0]);});
 	  key('down', function() {game.ship.power([0,1]);});
 	  key('space', function() {game.ship.fireBullet();});
+	};
+
+	GameView.prototype.animate = function(currentTime) {
+	  const delta = currentTime - this.lastTime;
+
+	  this.game.step(delta);
+	  this.game.draw(this.ctx);
+	  this.lastTime = currentTime;
+
+	  requestAnimationFrame(this.animate.bind(this));
 	};
 
 	module.exports = GameView;
@@ -135,9 +142,10 @@
 	  }
 	};
 
-	Game.prototype.moveObjects = function() {
-	  for (let i = 0; i < this.allObjects().length; i++) {
-	    this.allObjects()[i].move();
+	Game.prototype.moveObjects = function(delta) {
+	  const objects = this.allObjects();
+	  for (let i = 0; i < objects.length; i++) {
+	    objects[i].move(delta);
 	  }
 	};
 
@@ -164,8 +172,8 @@
 	  }
 	};
 
-	Game.prototype.step = function() {
-	  this.moveObjects();
+	Game.prototype.step = function(delta) {
+	  this.moveObjects(delta);
 	  this.checkCollisions();
 	};
 
@@ -182,7 +190,7 @@
 	};
 
 	Game.prototype.allObjects = function() {
-	  return this.asteroids.concat([this.ship], this.bullets);
+	  return this.asteroids.concat(this.ship, this.bullets);
 	};
 
 	Game.prototype.add = function (obj) {
@@ -296,9 +304,9 @@
 	  ctx.fill();
 	};
 
-	MovingObject.prototype.move = function() {
-	  this.pos[0] += this.vel[0];
-	  this.pos[1] += this.vel[1];
+	MovingObject.prototype.move = function(delta) {
+	  this.pos[0] += this.vel[0] * delta / 20;
+	  this.pos[1] += this.vel[1] * delta / 20;
 	  if (this.game.isOutOfBounds(this.pos)) {
 	    if (this.isWrappable) {
 	      this.pos = this.game.wrap(this.pos);
