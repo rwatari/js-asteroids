@@ -193,6 +193,12 @@
 	  }
 	};
 
+	Game.prototype.isOutOfBounds = function(pos) {
+	  const x = pos[0];
+	  const y = pos[1];
+	  return (x < 0 || x > Game.DIM_X || y < 0 || y > Game.DIM_Y);
+	};
+
 	module.exports = Game;
 
 
@@ -293,7 +299,13 @@
 	MovingObject.prototype.move = function() {
 	  this.pos[0] += this.vel[0];
 	  this.pos[1] += this.vel[1];
-	  this.pos = this.game.wrap(this.pos);
+	  if (this.game.isOutOfBounds(this.pos)) {
+	    if (this.isWrappable) {
+	      this.pos = this.game.wrap(this.pos);
+	    } else {
+	      this.game.remove(this);
+	    }
+	  }
 	};
 
 	MovingObject.prototype.isCollidedWith = function (otherObject) {
@@ -301,6 +313,8 @@
 	  const collisionLimit = this.radius + otherObject.radius;
 	  return dist < collisionLimit;
 	};
+
+	MovingObject.prototype.isWrappable = true;
 
 	module.exports = MovingObject;
 
@@ -336,9 +350,16 @@
 	};
 
 	Ship.prototype.fireBullet = function() {
+	  let bulletVel;
+	  if (Util.magnitude(this.vel) === 0) {
+	    bulletVel = [0, 5];
+	  } else {
+	    bulletVel = Util.unit(this.vel, 5);
+	  }
+
 	  const bullet = new Bullet({
-	    pos: this.pos,
-	    vel: Util.unit(this.vel, 5),
+	    pos: this.pos.slice(),
+	    vel: bulletVel,
 	    game: this.game,
 	  });
 	  this.game.add(bullet);
@@ -371,6 +392,8 @@
 
 	Bullet.RADIUS = 3;
 	Bullet.COLOR = "##0000";
+
+	Bullet.prototype.isWrappable = false;
 
 	module.exports = Bullet;
 
